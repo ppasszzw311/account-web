@@ -13,6 +13,13 @@
           <h4 class="mb-0">用戶登入</h4>
         </div>
         <div class="card-body">
+          @if (TempData["ErrorMessage"] != null)
+          {
+            <div class="alert alert-danger" role="alert">
+              @TempData["ErrorMessage"]
+            </div>
+          }
+          
           <form id="loginForm" asp-action="Login" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
 
@@ -74,10 +81,16 @@
           console.log('Login successful:', result);
 
           if (result.token && result.refreshToken) {
+            // 清除任何舊的 token
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('refresh_token');
+            
+            // 儲存新的 token
             localStorage.setItem('jwt_token', result.token);
             localStorage.setItem('refresh_token', result.refreshToken);
-            // Redirect to a protected page
-            window.location.href = '/Users';
+            
+            // 重定向到受保護的頁面
+            window.location.href = '/';
           } else {
             console.error('Missing tokens in response');
             if (validationSummary) {
@@ -86,11 +99,19 @@
           }
         } else {
           console.error('Login failed with status:', response.status);
-          const errorText = await response.text();
-          console.error('Error response:', errorText);
+          let errorMessage = '登入失敗，請檢查您的帳號和密碼。';
+          
+          try {
+            const errorResult = await response.json();
+            if (errorResult.message) {
+              errorMessage = errorResult.message;
+            }
+          } catch (parseError) {
+            console.error('Failed to parse error response:', parseError);
+          }
 
           if (validationSummary) {
-            validationSummary.innerHTML = '<ul><li>登入失敗，請檢查您的帳號和密碼。</li></ul>';
+            validationSummary.innerHTML = `<ul><li>${errorMessage}</li></ul>`;
           }
         }
       } catch (error) {

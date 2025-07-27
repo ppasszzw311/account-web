@@ -29,16 +29,48 @@
                                 <i class="fas fa-home"></i> 首頁
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">
-                                <i class="fas fa-users"></i> 使用者管理
-                            </a>
-                        </li>
+                        @if (!string.IsNullOrEmpty(Context.Session.GetString("UserId")))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">
+                                    <i class="fas fa-users"></i> 使用者管理
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Dashboard">
+                                    <i class="fas fa-tachometer-alt"></i> 儀表板
+                                </a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">
                                 <i class="fas fa-shield-alt"></i> 隱私政策
                             </a>
                         </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (!string.IsNullOrEmpty(Context.Session.GetString("UserId")))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user"></i> @Context.Session.GetString("UserName")
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle"></i> 個人資料</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> 設定</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 登出</a></li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Login">
+                                    <i class="fas fa-sign-in-alt"></i> 登入
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -58,6 +90,59 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    @if (!string.IsNullOrEmpty(Context.Session.GetString("UserId")))
+    {
+        <!-- 隱藏的 CSRF token -->
+        @Html.AntiForgeryToken()
+        
+        <script>
+            async function logout() {
+                try {
+                    // 從 localStorage 獲取 refresh token
+                    const refreshToken = localStorage.getItem('refresh_token');
+                    
+                    if (!refreshToken) {
+                        // 如果沒有 refresh token，直接清除本地儲存並重定向
+                        localStorage.removeItem('jwt_token');
+                        localStorage.removeItem('refresh_token');
+                        window.location.href = '/Auth/Login';
+                        return;
+                    }
+
+                    // 獲取 CSRF token
+                    const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+                    // 發送登出請求
+                    const response = await fetch('/Auth/Logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'RequestVerificationToken': csrfToken || ''
+                        },
+                        body: JSON.stringify({
+                            refreshToken: refreshToken
+                        })
+                    });
+
+                    if (response.ok) {
+                        console.log('登出成功');
+                    } else {
+                        console.error('登出失敗:', response.status);
+                    }
+                } catch (error) {
+                    console.error('登出請求失敗:', error);
+                } finally {
+                    // 無論如何都清除本地儲存並重定向到登入頁面
+                    localStorage.removeItem('jwt_token');
+                    localStorage.removeItem('refresh_token');
+                    window.location.href = '/Auth/Login';
+                }
+            }
+        </script>
+    }
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

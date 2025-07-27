@@ -8,6 +8,8 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using account_web.Data;
 
 namespace account_web.Controllers;
 
@@ -18,13 +20,15 @@ public class AuthController : Controller
   private readonly JwtService _jwtService;
   private readonly ILogger<AuthController> _logger;
   private readonly IConfiguration _configuration;
+  private readonly ApplicationDbContext _context;
 
-  public AuthController(UserServices userServices, JwtService jwtService, ILogger<AuthController> logger, IConfiguration configuration)
+  public AuthController(UserServices userServices, JwtService jwtService, ILogger<AuthController> logger, IConfiguration configuration, ApplicationDbContext context)
   {
     _userServices = userServices;
     _jwtService = jwtService;
     _logger = logger;
     _configuration = configuration;
+    _context = context;
   }
 
   // GET: /Auth/Login
@@ -135,25 +139,56 @@ public class AuthController : Controller
   // POST: /Auth/Logout
   [HttpPost("Logout")]
   [ValidateAntiForgeryToken]
-  public async Task<IActionResult> Logout([FromBody] LogoutDto logoutDto)
+  public async Task<IActionResult> Logout([FromBody] LogoutDto? logoutDto = null)
   {
     try
     {
-      var success = await _jwtService.RevokeRefreshTokenAsync(logoutDto.RefreshToken);
-      if (!success)
+      // 如果有提供 RefreshToken，則撤銷它
+      if (logoutDto != null && !string.IsNullOrEmpty(logoutDto.RefreshToken))
       {
-        return BadRequest(new { Message = "Refresh token 無效" });
+        var success = await _jwtService.RevokeRefreshTokenAsync(logoutDto.RefreshToken);
+        if (!success)
+        {
+          // 如果是 AJAX 請求，回傳 JSON 錯誤
+          if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+          {
+            return BadRequest(new { Message = "Refresh token 無效" });
+          }
+          // 如果是表單提交，設定錯誤訊息並重定向
+          TempData["ErrorMessage"] = "登出時發生錯誤";
+          return RedirectToAction("Login", "Auth");
+        }
       }
 
       // 清除Session
       HttpContext.Session.Clear();
 
-      return Ok(new { Message = "登出成功" });
+      // 檢查是否是AJAX請求
+      if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+      {
+        // AJAX請求，返回JSON
+        return Ok(new { Message = "登出成功" });
+      }
+      else
+      {
+        // 表單提交，重定向到登入頁面
+        return RedirectToAction("Login", "Auth");
+      }
     }
     catch (Exception ex)
     {
       _logger.LogError(ex, "Error during logout");
-      return StatusCode(500, new { Message = "登出時發生錯誤" });
+      
+      // 檢查是否是AJAX請求
+      if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+      {
+        return StatusCode(500, new { Message = "登出時發生錯誤" });
+      }
+      else
+      {
+        TempData["ErrorMessage"] = "登出時發生錯誤";
+        return RedirectToAction("Login", "Auth");
+      }
     }
   }
 
@@ -191,6 +226,44 @@ public class AuthController : Controller
         IsValid = false,
         ErrorMessage = "Token 驗證時發生錯誤"
       });
+    }
+  }
+
+  // GET: /Auth/Debug
+  [HttpGet("Debug")]
+  public async Task<IActionResult> Debug()
+  {
+    try
+    {
+      var sessionUserId = HttpContext.Session.GetString("UserId");
+      var sessionUserName = HttpContext.Session.GetString("UserName");
+      
+      var activeTokens = await _context.RefreshTokens
+          .Where(rt => !rt.IsRevoked && rt.ExpiresAt > DateTime.UtcNow)
+          .Select(rt => new { rt.UserId, rt.Token, rt.ExpiresAt })
+          .ToListAsync();
+
+      var revokedTokens = await _context.RefreshTokens
+          .Where(rt => rt.IsRevoked)
+          .Select(rt => new { rt.UserId, rt.Token, rt.RevokedAt, rt.RevokedBy })
+          .ToListAsync();
+
+      return Ok(new
+      {
+        Session = new
+        {
+          UserId = sessionUserId,
+          UserName = sessionUserName
+        },
+        ActiveTokens = activeTokens,
+        RevokedTokens = revokedTokens,
+        TotalTokens = activeTokens.Count + revokedTokens.Count
+      });
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error in debug endpoint");
+      return StatusCode(500, new { Error = ex.Message });
     }
   }
 
