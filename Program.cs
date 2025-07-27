@@ -13,6 +13,14 @@ public class Program
         // Add services to the container.
         builder.Services.AddControllersWithViews();
 
+        // 添加Session服務
+        builder.Services.AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromMinutes(30);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+        });
+
         // 設定 SQLite 資料庫連接
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
@@ -25,7 +33,7 @@ public class Program
             }
             options.UseSqlite(connectionString);
         });
-        
+
         builder.Services.AddScoped<UserServices>();
         builder.Services.AddScoped<FactoryServices>();
 
@@ -50,6 +58,9 @@ public class Program
         app.UseStaticFiles();
 
         app.UseRouting();
+
+        // 啟用Session中間件
+        app.UseSession();
 
         app.UseAuthorization();
 

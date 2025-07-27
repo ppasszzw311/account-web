@@ -1,5 +1,6 @@
 ﻿using account_web.Data;
 using account_web.Models;
+using account_web.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace account_web.Services;
@@ -120,5 +121,120 @@ public class UserServices : BaseDbService
         user.Password = newPassword;
         user.UpdatedAt = DateTime.Now;
         await _context.SaveChangesAsync();
+    }
+
+    // validate user login
+    public async Task<UserResponseDto?> ValidateUser(string userId, string password)
+    {
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
+        {
+            return null;
+        }
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId && u.Password == password);
+        if (user == null)
+        {
+            return null;
+        }
+
+        return new UserResponseDto
+        {
+            Id = user.Id,
+            UserId = user.UserId,
+            Name = user.Name,
+            FactoryId = user.FactoryId,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
+        };
+    }
+
+    // create user with DTO
+    public async Task<UserResponseDto> CreateUser(UserCreateDto userDto)
+    {
+        if (userDto == null) throw new ArgumentNullException(nameof(userDto));
+
+        var userExists = await _context.Users.AnyAsync(u => u.UserId == userDto.UserId);
+        if (userExists)
+        {
+            throw new InvalidOperationException($"User with ID {userDto.UserId} already exists.");
+        }
+
+        var user = new User
+        {
+            UserId = userDto.UserId,
+            Password = userDto.Password,
+            Name = userDto.Name,
+            FactoryId = userDto.FactoryId,
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
+        };
+
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        return new UserResponseDto
+        {
+            Id = user.Id,
+            UserId = user.UserId,
+            Name = user.Name,
+            FactoryId = user.FactoryId,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
+        };
+    }
+
+    // get user by id with DTO
+    public async Task<UserResponseDto?> GetUserResponseById(int id)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
+        if (user == null)
+        {
+            return null;
+        }
+
+        return new UserResponseDto
+        {
+            Id = user.Id,
+            UserId = user.UserId,
+            Name = user.Name,
+            FactoryId = user.FactoryId,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
+        };
+    }
+
+    // get user by userId with DTO
+    public async Task<UserResponseDto?> GetUserResponseByUserId(string userId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(m => m.UserId == userId);
+        if (user == null)
+        {
+            return null;
+        }
+
+        return new UserResponseDto
+        {
+            Id = user.Id,
+            UserId = user.UserId,
+            Name = user.Name,
+            FactoryId = user.FactoryId,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
+        };
+    }
+
+    // get all users with DTO
+    public async Task<IEnumerable<UserResponseDto>> GetUserResponses()
+    {
+        var users = await _context.Users.ToListAsync();
+        return users.Select(user => new UserResponseDto
+        {
+            Id = user.Id,
+            UserId = user.UserId,
+            Name = user.Name,
+            FactoryId = user.FactoryId,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
+        });
     }
 }

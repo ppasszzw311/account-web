@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using account_web.Data;
 using account_web.Models;
+using account_web.Models.Dtos;
 using account_web.Services;
 
 namespace account_web.Controllers
@@ -18,7 +19,7 @@ namespace account_web.Controllers
         // GET: Users
         public async Task<IActionResult> Index()
         {
-            return View(await _userServices.GetUsers());
+            return View(await _userServices.GetUserResponses());
         }
 
         // GET: Users/Details/5
@@ -29,7 +30,7 @@ namespace account_web.Controllers
                 return NotFound();
             }
 
-            var user = await _userServices.GetUserByUserId(userId);
+            var user = await _userServices.GetUserResponseByUserId(userId);
             if (user == null)
             {
                 return NotFound();
@@ -47,15 +48,15 @@ namespace account_web.Controllers
         // POST: Users/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserId,Name,Password,FactoryId")] User user)
+        public async Task<IActionResult> Create([Bind("UserId,Name,Password,FactoryId")] UserCreateDto userDto)
         {
             if (ModelState.IsValid)
             {
-                await _userServices.InsertUser(user);
+                await _userServices.CreateUser(userDto);
                 TempData["SuccessMessage"] = "使用者建立成功！";
                 return RedirectToAction(nameof(Index));
             }
-            return View(user);
+            return View(userDto);
         }
 
         // GET: Users/Edit/5
@@ -66,7 +67,7 @@ namespace account_web.Controllers
                 return NotFound();
             }
 
-            var user = await _userServices.GetUserByUserId(userId);
+            var user = await _userServices.GetUserResponseByUserId(userId);
             if (user == null)
             {
                 return NotFound();
@@ -77,10 +78,18 @@ namespace account_web.Controllers
         // POST: Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string userId, [Bind("UserId,Name,FactoryId")] User user)
+        public async Task<IActionResult> Edit(string userId, [Bind("Name,FactoryId")] UserUpdateDto userDto)
         {
             try
             {
+                var user = await _userServices.GetUserByUserId(userId);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                user.Name = userDto.Name;
+                user.FactoryId = userDto.FactoryId;
                 await _userServices.UpdateUserByUserId(user);
                 TempData["SuccessMessage"] = "使用者更新成功！";
             }
@@ -99,7 +108,7 @@ namespace account_web.Controllers
                 return NotFound();
             }
 
-            var user = await _userServices.GetUserByUserId(userId);
+            var user = await _userServices.GetUserResponseByUserId(userId);
             if (user == null)
             {
                 return NotFound();
