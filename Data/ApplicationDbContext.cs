@@ -20,6 +20,7 @@ namespace account_web.Data
         public DbSet<UserRoleMapping> UserRoleMappings { get; set; }
         public DbSet<LoginRecord> LoginRecords { get; set; }
         public DbSet<AccountActionRecord> AccountActionRecords { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -154,6 +155,24 @@ namespace account_web.Data
                 entity.Property(e => e.Detail).HasMaxLength(500);
                 entity.Property(e => e.CreatedAt).IsRequired();
                 entity.Property(e => e.UpdatedAt).IsRequired().HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            // 設定 RefreshToken 實體
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Token).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.UserId).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.ExpiresAt).IsRequired();
+                entity.Property(e => e.IsRevoked).IsRequired().HasDefaultValue(false);
+                entity.Property(e => e.RevokedBy).HasMaxLength(50);
+                entity.Property(e => e.IpAddress).HasMaxLength(15);
+                entity.Property(e => e.UserAgent).HasMaxLength(500);
+                entity.Property(e => e.CreatedAt).IsRequired();
+                entity.Property(e => e.UpdatedAt).IsRequired().HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.HasIndex(e => e.Token).IsUnique();
+                entity.HasIndex(e => e.UserId);
             });
 
             // 初始資料

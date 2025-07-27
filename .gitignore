@@ -298,9 +298,9 @@ healthchecksdb
 MigrationBackup/
 
 # SQLite database files - 只忽略資料庫檔案，保留遷移
-# *.db
-# *.db-shm
-# *.db-wal
+*.db
+*.db-shm
+*.db-wal
 
 # Entity Framework - 保留遷移檔案，只忽略特定檔案
 # Migrations/

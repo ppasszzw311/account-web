@@ -1,8 +1,56 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "首頁";
+    var isLoggedIn = Context.Session.GetString("UserId") != null;
+    var userName = Context.Session.GetString("UserName");
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    @if (isLoggedIn)
+    {
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h1 class="display-4 mb-4">歡迎回來，@userName！</h1>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">帳戶管理系統</h5>
+                        <p class="card-text">您已成功登入系統，可以開始使用各項功能。</p>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a class="btn btn-primary" asp-controller="Auth" asp-action="Dashboard">
+                                <i class="fas fa-tachometer-alt"></i> 前往儀表板
+                            </a>
+                            <a class="btn btn-secondary" asp-controller="Users" asp-action="Index">
+                                <i class="fas fa-users"></i> 使用者管理
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h1 class="display-4 mb-4">歡迎使用帳戶管理系統</h1>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">請登入以使用完整功能</h5>
+                        <p class="card-text">本系統提供完整的用戶管理功能，包括用戶創建、編輯、刪除等操作。</p>
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>提示：</strong> 登入後您將可以訪問使用者管理功能。
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a class="btn btn-primary btn-lg" asp-controller="Auth" asp-action="Login">
+                                <i class="fas fa-sign-in-alt"></i> 立即登入
+                            </a>
+                            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Privacy">
+                                <i class="fas fa-shield-alt"></i> 隱私政策
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
