@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using account_web.Data;
 using account_web.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace account_web;
 
@@ -13,12 +16,24 @@ public class Program
         // Add services to the container.
         builder.Services.AddControllersWithViews();
 
-        // 添加Session服務
-        builder.Services.AddSession(options =>
+        // Configure JWT Authentication
+        builder.Services.AddAuthentication(options =>
         {
-            options.IdleTimeout = TimeSpan.FromMinutes(30);
-            options.Cookie.HttpOnly = true;
-            options.Cookie.IsEssential = true;
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            };
         });
 
         // 設定 SQLite 資料庫連接
@@ -59,9 +74,7 @@ public class Program
 
         app.UseRouting();
 
-        // 啟用Session中間件
-        app.UseSession();
-
+        app.UseAuthentication(); // Enable authentication middleware
         app.UseAuthorization();
 
         app.MapControllerRoute(

@@ -4,6 +4,7 @@ using account_web.Data;
 using account_web.Models;
 using account_web.Models.Dtos;
 using account_web.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace account_web.Controllers
 {
@@ -16,15 +17,37 @@ namespace account_web.Controllers
             _userServices = userServices;
         }
 
+        // 檢查用戶是否已登入
+        private bool IsUserLoggedIn()
+        {
+            return HttpContext.Session.GetString("UserId") != null;
+        }
+
+        // 重定向到登入頁面
+        private IActionResult RedirectToLogin()
+        {
+            TempData["ErrorMessage"] = "請先登入以訪問此功能";
+            return RedirectToAction("Login", "Auth");
+        }
+
         // GET: Users
         public async Task<IActionResult> Index()
         {
+            if (!IsUserLoggedIn())
+            {
+                return RedirectToLogin();
+            }
             return View(await _userServices.GetUserResponses());
         }
 
         // GET: Users/Details/5
         public async Task<IActionResult> Details(string userId)
         {
+            if (!IsUserLoggedIn())
+            {
+                return RedirectToLogin();
+            }
+
             if (string.IsNullOrEmpty(userId))
             {
                 return NotFound();
@@ -42,6 +65,10 @@ namespace account_web.Controllers
         // GET: Users/Create
         public IActionResult Create()
         {
+            if (!IsUserLoggedIn())
+            {
+                return RedirectToLogin();
+            }
             return View();
         }
 
@@ -50,6 +77,11 @@ namespace account_web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UserId,Name,Password,FactoryId")] UserCreateDto userDto)
         {
+            if (!IsUserLoggedIn())
+            {
+                return RedirectToLogin();
+            }
+
             if (ModelState.IsValid)
             {
                 await _userServices.CreateUser(userDto);

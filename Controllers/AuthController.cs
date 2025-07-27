@@ -1,96 +1,110 @@
 using Microsoft.AspNetCore.Mvc;
-using account_web.Models;
 using account_web.Models.Dtos;
 using account_web.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace account_web.Controllers;
 
 public class AuthController : Controller
 {
-  private readonly UserServices _userServices;
-  private readonly ILogger<AuthController> _logger;
+    private readonly UserServices _userServices;
+    private readonly ILogger<AuthController> _logger;
+    private readonly IConfiguration _configuration;
 
-  public AuthController(UserServices userServices, ILogger<AuthController> logger)
-  {
-    _userServices = userServices;
-    _logger = logger;
-  }
-
-  // GET: /Auth/Login
-  public IActionResult Login()
-  {
-    // 如果已經登入，重定向到儀表板
-    if (HttpContext.Session.GetString("UserId") != null)
+    public AuthController(UserServices userServices, ILogger<AuthController> logger, IConfiguration configuration)
     {
-      return RedirectToAction("Dashboard", "Auth");
+        _userServices = userServices;
+        _logger = logger;
+        _configuration = configuration;
     }
-    return View();
-  }
 
-  // POST: /Auth/Login
-  [HttpPost]
-  [ValidateAntiForgeryToken]
-  public async Task<IActionResult> Login(LoginDto model)
-  {
-    if (ModelState.IsValid)
+    // GET: /Auth/Login
+    public IActionResult Login()
     {
-      try
-      {
-        var user = await _userServices.ValidateUser(model.UserId, model.Password);
-        if (user != null)
+        // This view will now be responsible for handling the JWT token returned by the POST action
+        return View();
+    }
+
+    // POST: /Auth/Login
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Login(LoginDto model)
+    {
+        if (ModelState.IsValid)
         {
-          // 登入成功，設定Session
-          HttpContext.Session.SetString("UserId", user.UserId);
-          HttpContext.Session.SetString("UserName", user.Name);
-          HttpContext.Session.SetInt32("UserId", user.Id);
-
-          _logger.LogInformation($"User {user.UserId} logged in successfully");
-          return RedirectToAction("Dashboard", "Auth");
+            try
+            {
+                var user = await _userServices.ValidateUser(model.UserId, model.Password);
+                if (user != null)
+                {
+                    _logger.LogInformation($"User {user.UserId} logged in successfully");
+                    var tokenString = GenerateJwtToken(user);
+                    return Ok(new { token = tokenString });
+                }
+                else
+                {
+                    ModelState.AddModelError("", "帳號或密碼錯誤");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Login error for user {UserId}", model.UserId);
+                ModelState.AddModelError("", "登入時發生錯誤，請稍後再試");
+            }
         }
-        else
+
+        // If we got this far, something failed, return to the view
+        return View(model);
+    }
+
+    private string GenerateJwtToken(Models.User user)
+    {
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
         {
-          ModelState.AddModelError("", "帳號或密碼錯誤");
-        }
-      }
-      catch (Exception ex)
-      {
-        _logger.LogError(ex, "Login error for user {UserId}", model.UserId);
-        ModelState.AddModelError("", "登入時發生錯誤，請稍後再試");
-      }
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserId),
+            new Claim(JwtRegisteredClaimNames.Name, user.Name),
+            new Claim("id", user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: _configuration["Jwt:Issuer"],
+            audience: _configuration["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.Now.AddMinutes(30),
+            signingCredentials: credentials);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    return View(model);
-  }
+    // GET: /Auth/Dashboard
+    // [Authorize] // This will now use JWT authentication
+    // public IActionResult Dashboard()
+    // {
+    //     // User identity is now retrieved from the token's claims
+    //     var userName = User.Identity.Name;
+    //     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    //
+    //     ViewBag.UserName = userName;
+    //     ViewBag.UserId = userId;
+    //
+    //     return View();
+    // }
 
-  // GET: /Auth/Dashboard
-  public IActionResult Dashboard()
-  {
-    var userId = HttpContext.Session.GetString("UserId");
-    if (string.IsNullOrEmpty(userId))
-    {
-      return RedirectToAction("Login", "Auth");
-    }
-
-    var userName = HttpContext.Session.GetString("UserName");
-    ViewBag.UserName = userName;
-    ViewBag.UserId = userId;
-
-    return View();
-  }
-
-  // POST: /Auth/Logout
-  [HttpPost]
-  [ValidateAntiForgeryToken]
-  public IActionResult Logout()
-  {
-    var userId = HttpContext.Session.GetString("UserId");
-    if (!string.IsNullOrEmpty(userId))
-    {
-      _logger.LogInformation($"User {userId} logged out");
-    }
-
-    HttpContext.Session.Clear();
-    return RedirectToAction("Login", "Auth");
-  }
+    // POST: /Auth/Logout
+    // [HttpPost]
+    // [ValidateAntiForgeryToken]
+    // public IActionResult Logout()
+    // {
+    //     // For JWT, logout is typically handled client-side by deleting the token.
+    //     // Server-side logout is not necessary unless you implement a token blacklist.
+    //     return Ok(new { message = "Logged out" });
+    // }
 }
