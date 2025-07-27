@@ -1,4 +1,4 @@
-@model account_web.Models.User
+@model account_web.Models.Dtos.UserResponseDto
 
 @{
     ViewData["Title"] = "編輯使用者";
@@ -31,6 +31,7 @@
                     <form asp-action="Edit" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+                        <input type="hidden" name="userId" value="@Model.UserId" />
                         <input type="hidden" asp-for="CreatedAt" />
 
                         <div class="row">
@@ -40,7 +41,8 @@
                                 <span asp-validation-for="Name" class="text-danger"></span>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label asp-for="UserId" class="form-label">使用者ID <small class="text-muted">(不可修改)</small></label>
+                                <label asp-for="UserId" class="form-label">使用者ID <small
+                                        class="text-muted">(不可修改)</small></label>
                                 <input asp-for="UserId" class="form-control" readonly />
                                 <span asp-validation-for="UserId" class="text-danger"></span>
                             </div>

@@ -124,7 +124,7 @@ public class UserServices : BaseDbService
     }
 
     // validate user login
-    public async Task<UserResponseDto?> ValidateUser(string userId, string password)
+    public async Task<User?> ValidateUser(string userId, string password)
     {
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
         {
@@ -137,15 +137,7 @@ public class UserServices : BaseDbService
             return null;
         }
 
-        return new UserResponseDto
-        {
-            Id = user.Id,
-            UserId = user.UserId,
-            Name = user.Name,
-            FactoryId = user.FactoryId,
-            CreatedAt = user.CreatedAt,
-            UpdatedAt = user.UpdatedAt
-        };
+        return user;
     }
 
     // create user with DTO

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using account_web.Data;
 
@@ -10,9 +11,11 @@ using account_web.Data;
 namespace account_web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250727103634_AddRefreshTokenToUser")]
+    partial class AddRefreshTokenToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
@@ -144,18 +147,18 @@ namespace account_web.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 370, DateTimeKind.Local).AddTicks(510),
+                            CreatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 793, DateTimeKind.Local).AddTicks(3310),
                             FactoryId = "F001",
                             FactoryName = "台北廠",
-                            UpdatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 370, DateTimeKind.Local).AddTicks(6190)
+                            UpdatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 793, DateTimeKind.Local).AddTicks(4160)
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 371, DateTimeKind.Local).AddTicks(3340),
+                            CreatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 793, DateTimeKind.Local).AddTicks(4880),
                             FactoryId = "F002",
                             FactoryName = "台中廠",
-                            UpdatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 371, DateTimeKind.Local).AddTicks(3340)
+                            UpdatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 793, DateTimeKind.Local).AddTicks(4880)
                         });
                 });
 
@@ -270,22 +273,22 @@ namespace account_web.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 384, DateTimeKind.Local).AddTicks(2480),
+                            CreatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 796, DateTimeKind.Local).AddTicks(110),
                             FactoryId = "F001",
                             ProjectId = "P001",
                             ProjectName = "專案一",
                             RoleId = 0,
-                            UpdatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 384, DateTimeKind.Local).AddTicks(2600)
+                            UpdatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 796, DateTimeKind.Local).AddTicks(140)
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 384, DateTimeKind.Local).AddTicks(2670),
+                            CreatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 796, DateTimeKind.Local).AddTicks(170),
                             FactoryId = "F001",
                             ProjectId = "P002",
                             ProjectName = "專案二",
                             RoleId = 1,
-                            UpdatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 384, DateTimeKind.Local).AddTicks(2680)
+                            UpdatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 796, DateTimeKind.Local).AddTicks(180)
                         });
                 });
 
@@ -321,63 +324,6 @@ namespace account_web.Migrations
                     b.ToTable("ProjectMembers");
                 });
 
-            modelBuilder.Entity("account_web.Models.RefreshToken", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("IpAddress")
-                        .HasMaxLength(15)
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsRevoked")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false);
-
-                    b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RevokedBy")
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("UserAgent")
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Token")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RefreshTokens");
-                });
-
             modelBuilder.Entity("account_web.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -402,6 +348,12 @@ namespace account_web.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
@@ -423,21 +375,21 @@ namespace account_web.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 396, DateTimeKind.Local).AddTicks(9600),
+                            CreatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 796, DateTimeKind.Local).AddTicks(5100),
                             FactoryId = "F001",
                             Name = "張三",
                             Password = "password123",
-                            UpdatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 396, DateTimeKind.Local).AddTicks(9700),
+                            UpdatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 796, DateTimeKind.Local).AddTicks(5120),
                             UserId = "admin"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 396, DateTimeKind.Local).AddTicks(9770),
+                            CreatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 796, DateTimeKind.Local).AddTicks(5130),
                             FactoryId = "F001",
                             Name = "李四",
                             Password = "password456",
-                            UpdatedAt = new DateTime(2025, 7, 27, 19, 6, 39, 396, DateTimeKind.Local).AddTicks(9780),
+                            UpdatedAt = new DateTime(2025, 7, 27, 18, 36, 31, 796, DateTimeKind.Local).AddTicks(5130),
                             UserId = "user01"
                         });
                 });

@@ -4,6 +4,7 @@ using account_web.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace account_web;
 
@@ -15,6 +16,14 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();
+
+        // 添加Session服務
+        builder.Services.AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromMinutes(30);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+        });
 
         // Configure JWT Authentication
         builder.Services.AddAuthentication(options =>
@@ -32,7 +41,7 @@ public class Program
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = builder.Configuration["Jwt:Issuer"],
                 ValidAudience = builder.Configuration["Jwt:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found.")))
             };
         });
 
@@ -47,10 +56,12 @@ public class Program
                 connectionString = $"Data Source={dbPath}";
             }
             options.UseSqlite(connectionString);
+            options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
         builder.Services.AddScoped<UserServices>();
         builder.Services.AddScoped<FactoryServices>();
+        builder.Services.AddScoped<JwtService>();
 
         var app = builder.Build();
 
@@ -74,6 +85,7 @@ public class Program
 
         app.UseRouting();
 
+        app.UseSession(); // 啟用Session中間件
         app.UseAuthentication(); // Enable authentication middleware
         app.UseAuthorization();
 
