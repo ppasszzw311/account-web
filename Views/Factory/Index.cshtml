@@ -1,0 +1,86 @@
+﻿@model IEnumerable<account_web.Models.Factory>
+
+@{
+    ViewData["Title"] = "廠區設定";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>@ViewData["Title"]</h2>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> 新增廠區
+                </a>
+            </div>
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card">
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>@Html.DisplayNameFor(model => model.FactoryName)</th>
+                                        <th>@Html.DisplayNameFor(model => model.FactoryId)</th>
+                                        <th>@Html.DisplayNameFor(model => model.CreatedAt)</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(modelItem => item.FactoryName)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.FactoryId)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.CreatedAt)</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-factoryId="@item.FactoryId"
+                                                       class="btn btn-info btn-sm">
+                                                        <i class="fas fa-eye"></i> 詳細
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-factoryId="@item.FactoryId"
+                                                       class="btn btn-warning btn-sm">
+                                                        <i class="fas fa-edit"></i> 編輯
+                                                    </a>
+                                                    <a asp-action="Delete" asp-route-factoryId="@item.FactoryId"
+                                                       class="btn btn-danger btn-sm">
+                                                        <i class="fas fa-trash"></i> 刪除
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <h4 class="text-muted">尚無廠區資料</h4>
+                            <p class="text-muted">點擊上方的「新增廠區」按鈕來建立第一個廠區</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,13 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace account_web.Services;
 
-public class FactoryServices
+public class FactoryServices : BaseDbService
 {
-    private readonly ApplicationDbContext _context;
 
-    public FactoryServices(ApplicationDbContext context)
-    {
-        _context = context;
+    public FactoryServices(ApplicationDbContext context) : base(context)
+    {    
     }
 
     public async Task<IEnumerable<Factory>> GetFactories()
@@ -61,5 +59,10 @@ public class FactoryServices
         }
         _context.Factories.Remove(factory);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<Factory?> GetFactoryByFactoryId(string factoryId)
+    {
+        return await _context.Factories.FirstOrDefaultAsync(m => m.FactoryId == factoryId);
     }
 }

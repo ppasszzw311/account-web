@@ -43,15 +43,11 @@ public class UserServices : BaseDbService
     public async Task UpdateUser(User user)
     {
         if (user == null) throw new ArgumentNullException(nameof(user));
-
-        // 先根据主键Id查找用户
         var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
         if (existingUser == null)
         {
             throw new ArgumentNullException($"User with Id {user.Id} not found!");
         }
-
-        // 更新用户信息
         existingUser.UserId = user.UserId;
         existingUser.Name = user.Name;
         existingUser.Password = user.Password;
@@ -66,14 +62,11 @@ public class UserServices : BaseDbService
     {
         if (user == null) throw new ArgumentNullException(nameof(user));
 
-        // 先根据UserId查找用户
         var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == user.UserId);
         if (existingUser == null)
         {
             throw new ArgumentNullException($"User with UserId {user.UserId} not found!");
         }
-
-        // 更新用戶資訊（不包含密碼和UserId）
         existingUser.Name = user.Name;
         existingUser.FactoryId = user.FactoryId;
         existingUser.UpdatedAt = DateTime.Now;

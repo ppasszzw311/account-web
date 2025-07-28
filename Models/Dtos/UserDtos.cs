@@ -19,10 +19,15 @@ public class UserDto
 public class UserResponseDto
 {
     public int Id { get; set; }
+    [Display(Name = "使用者帳號")]
     public string UserId { get; set; } = string.Empty;
+    [Display(Name = "姓名")]
     public string Name { get; set; } = string.Empty;
+    [Display(Name = "廠區ID")]
     public string? FactoryId { get; set; }
+    [Display(Name = "建立時間")]
     public DateTime CreatedAt { get; set; }
+    [Display(Name = "修改時間")]
     public DateTime UpdatedAt { get; set; }
 }
 
