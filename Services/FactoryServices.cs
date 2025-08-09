@@ -23,6 +23,11 @@ public class FactoryServices
         return await _context.Factories.FirstOrDefaultAsync(m => m.Id == id);
     }
 
+    public async Task<Factory?> GetFactoryByFactoryId(string factoryId)
+    {
+        return await _context.Factories.FirstOrDefaultAsync(m => m.FactoryId == factoryId);
+    }
+
     public async void InsertFactory(Factory factory)
     {
         if (factory == null) throw new ArgumentNullException(nameof(factory));

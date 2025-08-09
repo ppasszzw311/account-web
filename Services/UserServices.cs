@@ -229,4 +229,11 @@ public class UserServices : BaseDbService
             UpdatedAt = user.UpdatedAt
         });
     }
+    
+    // 確認使用者是否存在
+    public async Task<bool> IsUserExists(string userId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(m => m.UserId == userId);
+        return user != null;
+    }
 }

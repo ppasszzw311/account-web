@@ -1,0 +1,84 @@
+﻿@model account_web.Models.Factory
+
+@{
+    ViewData["Title"] = "廠區詳細資料";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">@ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center mb-4">
+                                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 80px;">
+                                    <i class="fas fa-user fa-2x text-white"></i>
+                                </div>
+                                <h5 class="mt-2 mb-0">@Html.DisplayFor(model => model.FactoryName)</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="table-responsive">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-bold text-muted" style="width: 30%;">
+                                                @Html.DisplayNameFor(model => model.FactoryName)：
+                                            </td>
+                                            <td>@Html.DisplayFor(model => model.FactoryName)</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-muted">
+                                                @Html.DisplayNameFor(model => model.FactoryId)：
+                                            </td>
+                                            <td>@Html.DisplayFor(model => model.FactoryId)</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-muted">
+                                                @Html.DisplayNameFor(model =>
+                                                                                                model.CreatedAt)：</ td >
+                                            <td>
+                                                <i class="fas fa-calendar-plus"></i> @Html.DisplayFor(model =>
+                                                                                                model.CreatedAt)
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-muted">
+                                                @Html.DisplayNameFor(model =>
+                                                                                                model.UpdatedAt)：</ td >
+                                            <td>
+                                                <i class="fas fa-calendar-check"></i> @Html.DisplayFor(model =>
+                                                                                                model.UpdatedAt)
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> 返回列表
+                        </a>
+                        <div>
+                            <a asp-action="Edit" asp-route-factoryId="@Model?.FactoryId" class="btn btn-warning me-2">
+                                <i class="fas fa-edit"></i> 編輯
+                            </a>
+                            <a asp-action="Delete" asp-route-factoryId="@Model?.FactoryId" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> 刪除
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
