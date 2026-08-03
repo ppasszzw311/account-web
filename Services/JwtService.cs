@@ -7,6 +7,7 @@ using account_web.Models;
 using account_web.Models.Dtos;
 using account_web.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Transactions;
 
 namespace account_web.Services;
 
@@ -37,11 +38,22 @@ public class JwtService
       IpAddress = ipAddress,
       UserAgent = userAgent
     };
+        using (var transaction = _context.Database.BeginTransaction())
+        {
+            _context.RefreshTokens.Add(refreshTokenEntity);
+            _context.Add(new LoginRecord
+            {
+                UserId = user.UserId,
+                LoginTime = DateTime.UtcNow.ToString("o"),
+                IpAddress = ipAddress ?? "Unknown"
+            });
 
-    _context.RefreshTokens.Add(refreshTokenEntity);
-    _context.SaveChanges();
+            _context.SaveChanges();
+            transaction.Commit();
+        }
 
-    return new JwtTokenDto
+
+        return new JwtTokenDto
     {
       AccessToken = accessToken,
       RefreshToken = refreshToken,

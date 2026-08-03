@@ -22,6 +22,7 @@ bld/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+*.lscache
 
 # StyleCop
 StyleCopReport.xml
@@ -204,6 +205,11 @@ ServiceFabricBackup/
 *.mdf
 *.ldf
 *.ndf
+
+# Local SQLite databases
+*.db
+*.db-shm
+*.db-wal
 
 # Business Intelligence projects
 *.rdl.data

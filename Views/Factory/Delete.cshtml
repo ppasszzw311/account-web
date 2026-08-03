@@ -1,0 +1,76 @@
+﻿@model account_web.Models.Factory
+
+@{
+    ViewData["Title"] = "刪除廠區";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> @ViewData["Title"]
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-warning"></i>
+                        <strong>警告：</strong>您確定要刪除此廠區嗎？此操作無法復原。
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center mb-4">
+                                <div class="bg-danger rounded-circle d-inline-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 80px;">
+                                    <i class="fas fa-user fa-2x text-white"></i>
+                                </div>
+                                <h5 class="mt-2 mb-0 text-danger">@Html.DisplayFor(model => model.FactoryName)</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="table-responsive">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-bold text-muted" style="width: 30%;">
+                                                @Html.DisplayNameFor(model => model.FactoryName)：
+                                            </td>
+                                            <td>@Html.DisplayFor(model => model.FactoryName)</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-muted">
+                                                @Html.DisplayNameFor(model => model.FactoryId)：
+                                            </td>
+                                            <td>@Html.DisplayFor(model => model.FactoryId)</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-muted">
+                                                @Html.DisplayNameFor(model => model.CreatedAt)：</ td >
+                                            <td>@Html.DisplayFor(model => model.CreatedAt)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="FactoryId" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> 取消
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> 確認刪除
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

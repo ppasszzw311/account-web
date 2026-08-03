@@ -133,6 +133,15 @@ public class UserServices : BaseDbService
         return user;
     }
 
+    public async Task<bool> IsUserExists(string userId)
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            throw new ArgumentException("UserId cannot be null or empty", nameof(userId));
+        }
+        return await _context.Users.AnyAsync(u => u.UserId == userId);
+    }
+
     // create user with DTO
     public async Task<UserResponseDto> CreateUser(UserCreateDto userDto)
     {
