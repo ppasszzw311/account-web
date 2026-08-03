@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using account_web.Data;
-using account_web.Models;
 using account_web.Models.Dtos;
 using account_web.Services;
-using Microsoft.AspNetCore.Http;
 
 namespace account_web.Controllers
 {

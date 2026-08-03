@@ -10,8 +10,19 @@ public class FactoryDtos
 public class CreateFactoryDto
 {
     [Required]
-    public required string FactoryId { get; set; } = string.Empty;
+    public string FactoryId { get; set; } = string.Empty;
     [Required]
-    public required string FactoryName { get; set; } = string.Empty;
+    public string FactoryName { get; set; } = string.Empty;
+    
 }
 
+public class EditFactoryResponseDto
+{
+    public string FactoryId { get; set; }
+    public string FactoryName { get; set; }
+    public EditFactoryResponseDto(Factory factory)
+    {
+        FactoryId = factory.FactoryId ?? string.Empty;
+        FactoryName = factory.FactoryName ?? string.Empty;
+    }
+}

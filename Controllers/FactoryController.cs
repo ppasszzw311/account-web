@@ -1,6 +1,6 @@
-﻿using account_web.Services;
+﻿using account_web.Models.Dtos;
+using account_web.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace account_web.Controllers;
 
@@ -48,7 +48,7 @@ public class FactoryController : BaseViewController
         return View();
     }
 
-    public IActionResult Edit(string factoryId)
+    public async Task<IActionResult> Edit(string factoryId)
     {
         if (!IsUserLoggedIn())
         {
@@ -58,7 +58,7 @@ public class FactoryController : BaseViewController
         {
             return NotFound();
         }
-        var factory = _factoryServices.GetFactoryByFactoryId(factoryId);
+        var factory = await _factoryServices.GetFactoryByFactoryId(factoryId);
         if (factory == null)
         {
             return NotFound();
@@ -66,7 +66,7 @@ public class FactoryController : BaseViewController
         return View(factory);
     }
 
-    public IActionResult Delete(string factoryId)
+    public async Task<IActionResult> Delete(string factoryId)
     {
         if (!IsUserLoggedIn())
         {
@@ -76,7 +76,7 @@ public class FactoryController : BaseViewController
         {
             return NotFound();
         }
-        var factory = _factoryServices.GetFactoryByFactoryId(factoryId);
+        var factory = await _factoryServices.GetFactoryByFactoryId(factoryId);
         if (factory == null)
         {
             return NotFound();
